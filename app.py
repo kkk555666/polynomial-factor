@@ -4,13 +4,6 @@ from tkinter import messagebox
 
 root = tk.Tk()
 root.title("เครื่องมือแยกตัวประกอบพหุนาม (มีปุ่มกดช่วยพิมพ์)")
-factoring-app
-/
-app.py
-in
-main
-
-
 root.geometry("700x600")
 
 x = sp.symbols('x')
@@ -70,6 +63,7 @@ def on_button_click(btn_text):
     if btn_text == '⌫':
         current_text = entry.get()
         if current_text:
+            # ลบทีละตัวจากท้ายข้อความ
             entry.delete(len(current_text)-1, tk.END)
     else:
         insert_text(btn_text)
