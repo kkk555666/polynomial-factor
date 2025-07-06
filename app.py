@@ -12,7 +12,7 @@ input_str = st.session_state.poly_input
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-input_str = st.text_input("พหุนาม", value=input_str, key="text_input")
+# ลบ st.text_input ออก ไม่แสดงช่องพิมพ์
 
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
@@ -40,6 +40,7 @@ for i, btn in enumerate(sum(button_rows, [])):
 
 st.session_state.poly_input = input_str
 
+# เอาช่องแสดงผลขึ้นมาแทนช่อง input
 st.code(input_str, language="plaintext")
 
 if st.button("✅ คำนวณแยกตัวประกอบ"):
