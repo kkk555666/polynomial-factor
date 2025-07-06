@@ -4,28 +4,15 @@ import sympy as sp
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
 
-# เริ่มต้นค่า input ใน session state
 if "poly_input" not in st.session_state:
     st.session_state.poly_input = ""
 
-# ฟังก์ชันแก้ไข input รับค่าปัจจุบันแล้วคืนค่าใหม่
-def backspace(s):
-    return s[:-1]
-
-def clear_input(s):
-    return ""
-
-def add_text(s, t):
-    return s + t
+input_str = st.session_state.poly_input
 
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# ตัวแปรกลางเก็บค่า input ชั่วคราว
-input_str = st.session_state.poly_input
-
-# แสดงช่อง input (text_input) พร้อม value จาก input_str
-input_str = st.text_input("พหุนาม", value=input_str, key="text_display")
+input_str = st.text_input("พหุนาม", value=input_str, key="text_input")
 
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
@@ -41,28 +28,22 @@ symbol_map = {
     'หาร': '/',
 }
 
-# สร้างปุ่มและตรวจสอบการกด
-for row in button_rows:
-    cols = st.columns(len(row))
-    for i, btn in enumerate(row):
-        if cols[i].button(btn, key=f"{btn}_{i}"):
-            if btn == '⌫':
-                input_str = backspace(input_str)
-            elif btn == 'ล้าง':
-                input_str = clear_input(input_str)
-            else:
-                actual = symbol_map.get(btn, btn)
-                input_str = add_text(input_str, actual)
+cols = st.columns(5)
+for i, btn in enumerate(sum(button_rows, [])):
+    if cols[i % 5].button(btn, key=f"btn_{btn}_{i}"):
+        if btn == '⌫':
+            input_str = input_str[:-1]
+        elif btn == 'ล้าง':
+            input_str = ""
+        else:
+            input_str += symbol_map.get(btn, btn)
 
-# อัปเดต session_state ด้วยค่า input_str ที่แก้ไขแล้ว
 st.session_state.poly_input = input_str
 
-# แสดงข้อความ input ปัจจุบัน
-st.code(st.session_state.poly_input, language="plaintext")
+st.code(input_str, language="plaintext")
 
-# ปุ่มคำนวณแยกตัวประกอบ
 if st.button("✅ คำนวณแยกตัวประกอบ"):
-    expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
+    expr_str = input_str.replace("^", "**").replace(" ", "")
     try:
         expr = sp.sympify(expr_str, locals={'x': x})
         if expr.free_symbols != {x} and expr.free_symbols != set():
@@ -77,4 +58,3 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 st.code(str(result))
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
-
