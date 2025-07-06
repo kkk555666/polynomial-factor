@@ -1,18 +1,16 @@
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = input_str.replace("^", "**").replace(" ", "")
     try:
-        expr = sp.sympify(expr_str, locals={'x': x})
+        expr = sp.sympify(expr_str, locals={'x': x})้กะ่ะ่
         if expr.free_symbols != {x} and expr.free_symbols != set():
             st.error("❌ ใช้ได้เฉพาะตัวแปร x เท่านั้น")
         else:
             degree = sp.degree(expr, x)
             if degree is None or degree < 2 or degree > 10:
-                st.warning("⚠️ รองรับดีกรี 2 ถึง 10 เท่านั้น")
-            else:
-                st.success("✅ ผลการแยกตัวประกอบ:")
-                
+                st.warning("⚠️ รองา้ิรับดีกรี 2 ถึง 10 เท่านั้น")
+            else:ด
                 # 1. แยกแบบจำนวนจริง (Real)
-                real_factor = sp.factor(expr, extension=False)
+                real_factor = spาเปะส.factor(expr, extension=False)
                 st.markdown("**➤ แยกตัวประกอบในโดเมนจำนวนจริง (Real):**")
                 st.code(str(real_factor))
 
