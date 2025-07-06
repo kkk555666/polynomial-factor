@@ -1,46 +1,3 @@
-import streamlit as st
-import sympy as sp
-
-st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
-x = sp.symbols('x')
-
-if "poly_input" not in st.session_state:
-    st.session_state.poly_input = ""
-
-input_str = st.session_state.poly_input
-
-st.title("🧮 แยกตัวประกอบพหุนาม")
-st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
-
-button_rows = [
-    ['7', '8', '9', 'บวก', 'ลบ'],
-    ['4', '5', '6', 'คูณ', 'หาร'],
-    ['1', '2', '3', 'x', '^'],
-    ['0', '(', ')', '⌫', 'ล้าง']
-]
-
-symbol_map = {
-    'บวก': '+',
-    'ลบ': '-',
-    'คูณ': '*',
-    'หาร': '/',
-}
-
-cols = st.columns(5)
-for i, btn in enumerate(sum(button_rows, [])):
-    if cols[i % 5].button(btn, key=f"btn_{btn}_{i}"):
-        if btn == '⌫':
-            input_str = input_str[:-1]
-        elif btn == 'ล้าง':
-            input_str = ""
-        else:
-            input_str += symbol_map.get(btn, btn)
-
-st.session_state.poly_input = input_str
-
-# แสดง input ที่พิมพ์โดยปุ่ม
-st.code(input_str, language="plaintext")
-
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = input_str.replace("^", "**").replace(" ", "")
     try:
@@ -52,8 +9,25 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
             if degree is None or degree < 2 or degree > 10:
                 st.warning("⚠️ รองรับดีกรี 2 ถึง 10 เท่านั้น")
             else:
-                result = sp.factor(expr)
                 st.success("✅ ผลการแยกตัวประกอบ:")
-                st.code(str(result))
+                
+                # 1. แยกแบบจำนวนจริง (Real)
+                real_factor = sp.factor(expr, extension=False)
+                st.markdown("**➤ แยกตัวประกอบในโดเมนจำนวนจริง (Real):**")
+                st.code(str(real_factor))
+
+                # 2. แยกแบบจำนวนเชิงซ้อน (Complex)
+                complex_factor = sp.factor(expr, extension=sp.I)
+                st.markdown("**➤ แยกตัวประกอบในโดเมนจำนวนเชิงซ้อน (Complex):**")
+                st.code(str(complex_factor))
+
+                # 3. แสดงรากแบบ Quadratic (เมื่อ factor ไม่ได้เพิ่ม)
+                roots = sp.solve(expr, x)
+                if len(roots) > 0:
+                    quadratic_form = 1
+                    for r in roots:
+                        quadratic_form *= (x - r)
+                    st.markdown("**➤ แยกตัวประกอบโดยแสดงราก (อาจเป็น Quadratic Complex Form):**")
+                    st.code(str(sp.simplify(quadratic_form)))
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
