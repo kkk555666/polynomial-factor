@@ -10,7 +10,17 @@ if "poly_input" not in st.session_state:
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# แสดงช่องพิมพ์ที่ลื่นไหลด้วย st.text_input
+input_str = st.session_state.poly_input
+
+def add_text(t):
+    st.session_state.poly_input += t
+
+def backspace():
+    st.session_state.poly_input = st.session_state.poly_input[:-1]
+
+def clear_input():
+    st.session_state.poly_input = ""
+
 input_str = st.text_input("พหุนาม", value=st.session_state.poly_input, key="poly_input")
 
 button_rows = [
@@ -31,12 +41,11 @@ cols = st.columns(5)
 for i, btn in enumerate(sum(button_rows, [])):
     if cols[i % 5].button(btn, key=f"btn_{btn}_{i}"):
         if btn == '⌫':
-            input_str = input_str[:-1]
+            backspace()
         elif btn == 'ล้าง':
-            input_str = ""
+            clear_input()
         else:
-            input_str += symbol_map.get(btn, btn)
-        st.session_state.poly_input = input_str
+            add_text(symbol_map.get(btn, btn))
 
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
@@ -54,5 +63,4 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 st.code(str(result))
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
-
 
