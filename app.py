@@ -4,11 +4,28 @@ import sympy as sp
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
 
+# ใส่ CSS ให้ปุ่มอยู่ชิดกันในมือถือ
+st.markdown("""
+<style>
+  div.stButton > button {
+    margin: 2px !important;
+    min-width: 50px !important;
+  }
+  div[data-testid="column"] {
+    padding: 2px !important;
+  }
+</style>
+""", unsafe_allow_html=True)
+
+# เก็บ input ไว้ใน session_state
 if "poly_input" not in st.session_state:
     st.session_state.poly_input = ""
 
-def add_text(text):
-    st.session_state.poly_input += text
+def update_input(new_text):
+    st.session_state.poly_input = new_text
+
+def add_text(t):
+    st.session_state.poly_input += t
 
 def backspace():
     st.session_state.poly_input = st.session_state.poly_input[:-1]
@@ -16,29 +33,13 @@ def backspace():
 def clear_input():
     st.session_state.poly_input = ""
 
-# CSS ปรับปุ่มให้ชิดกัน
-st.markdown("""
-<style>
-  div.stButton > button {
-    margin: 2px 2px !important;
-    width: 50px !important;
-  }
-  div.stColumns > div {
-    padding: 0px !important;
-  }
-</style>
-""", unsafe_allow_html=True)
-
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# ใช้ text_input ให้ผู้ใช้พิมพ์เอง
-poly_input = st.text_input("พหุนาม", value=st.session_state.poly_input)
+# กล่อง input ผูกกับ session_state โดยตรง
+st.text_input("พหุนาม", key="poly_input", label_visibility="collapsed")
 
-# อัพเดต session_state เมื่อพิมพ์
-if poly_input != st.session_state.poly_input:
-    st.session_state.poly_input = poly_input
-
+# ปุ่มกด
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
     ['4', '5', '6', 'คูณ', 'หาร'],
@@ -53,12 +54,10 @@ symbol_map = {
     'หาร': '/',
 }
 
-cols_list = []
 for row in button_rows:
     cols = st.columns(len(row))
-    cols_list.append(cols)
     for i, btn in enumerate(row):
-        if cols[i].button(btn):
+        if cols[i].button(btn, key=f"{btn}_{i}"):
             if btn == '⌫':
                 backspace()
             elif btn == 'ล้าง':
@@ -66,9 +65,8 @@ for row in button_rows:
             else:
                 actual = symbol_map.get(btn, btn)
                 add_text(actual)
-            # อัพเดต text_input หลังกดปุ่ม
-            st.session_state.poly_input = st.session_state.poly_input
 
+# ปุ่มคำนวณ
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
     try:
