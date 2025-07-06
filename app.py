@@ -7,13 +7,11 @@ x = sp.symbols('x')
 if "poly_input" not in st.session_state:
     st.session_state.poly_input = ""
 
-input_str = st.session_state.poly_input
-
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# แสดงช่องผลลัพธ์ input ขึ้นก่อนปุ่มกด
-st.code(input_str, language="plaintext")
+# แสดงช่องพิมพ์ที่ลื่นไหลด้วย st.text_input
+input_str = st.text_input("พหุนาม", value=st.session_state.poly_input, key="poly_input")
 
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
@@ -38,11 +36,10 @@ for i, btn in enumerate(sum(button_rows, [])):
             input_str = ""
         else:
             input_str += symbol_map.get(btn, btn)
-
-st.session_state.poly_input = input_str
+        st.session_state.poly_input = input_str
 
 if st.button("✅ คำนวณแยกตัวประกอบ"):
-    expr_str = input_str.replace("^", "**").replace(" ", "")
+    expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
     try:
         expr = sp.sympify(expr_str, locals={'x': x})
         if expr.free_symbols != {x} and expr.free_symbols != set():
@@ -57,4 +54,5 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 st.code(str(result))
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
+
 
