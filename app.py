@@ -1,30 +1,30 @@
-
 import streamlit as st
 import sympy as sp
 
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
 
+# เริ่มต้นค่า input ใน session state
 if "poly_input" not in st.session_state:
     st.session_state.poly_input = ""
 
-# เก็บค่าชั่วคราวเพื่อแก้ไข input
-input_str = st.session_state.poly_input
+# ฟังก์ชันแก้ไข input รับค่าปัจจุบันแล้วคืนค่าใหม่
+def backspace(s):
+    return s[:-1]
 
-def backspace():
-    nonlocal input_str  # ถ้าอยู่ในฟังก์ชัน แต่ถ้าไม่ใช้ ให้ประกาศเป็น global หรืออื่น ๆ
-    return input_str[:-1]
-
-def clear_input():
+def clear_input(s):
     return ""
 
-def add_text(t, s):
+def add_text(s, t):
     return s + t
 
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# แสดงช่อง input และรับค่าจากผู้ใช้
+# ตัวแปรกลางเก็บค่า input ชั่วคราว
+input_str = st.session_state.poly_input
+
+# แสดงช่อง input (text_input) พร้อม value จาก input_str
 input_str = st.text_input("พหุนาม", value=input_str, key="text_display")
 
 button_rows = [
@@ -41,25 +41,26 @@ symbol_map = {
     'หาร': '/',
 }
 
-cols = None
+# สร้างปุ่มและตรวจสอบการกด
 for row in button_rows:
     cols = st.columns(len(row))
     for i, btn in enumerate(row):
-        if cols[i].button(btn):
+        if cols[i].button(btn, key=f"{btn}_{i}"):
             if btn == '⌫':
-                input_str = input_str[:-1]
+                input_str = backspace(input_str)
             elif btn == 'ล้าง':
-                input_str = ""
+                input_str = clear_input(input_str)
             else:
                 actual = symbol_map.get(btn, btn)
-                input_str += actual
+                input_str = add_text(input_str, actual)
 
-# อัปเดตค่า session_state จาก input_str หลังจากแก้ไขปุ่มแล้ว
+# อัปเดต session_state ด้วยค่า input_str ที่แก้ไขแล้ว
 st.session_state.poly_input = input_str
 
-# แสดงข้อความ input อัปเดต
+# แสดงข้อความ input ปัจจุบัน
 st.code(st.session_state.poly_input, language="plaintext")
 
+# ปุ่มคำนวณแยกตัวประกอบ
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
     try:
