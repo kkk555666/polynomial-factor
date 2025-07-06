@@ -1,42 +1,32 @@
+
 import streamlit as st
 import sympy as sp
 
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
 
-# ตั้งค่าเริ่มต้น
 if "poly_input" not in st.session_state:
     st.session_state.poly_input = ""
 
+# เก็บค่าชั่วคราวเพื่อแก้ไข input
+input_str = st.session_state.poly_input
+
 def backspace():
-    st.session_state.poly_input = st.session_state.poly_input[:-1]
+    nonlocal input_str  # ถ้าอยู่ในฟังก์ชัน แต่ถ้าไม่ใช้ ให้ประกาศเป็น global หรืออื่น ๆ
+    return input_str[:-1]
 
 def clear_input():
-    st.session_state.poly_input = ""
+    return ""
 
-def add_text(t):
-    st.session_state.poly_input += t
-
-# CSS ให้ปุ่มชิดกัน
-st.markdown("""
-<style>
-  div.stButton > button {
-    margin: 2px !important;
-    min-width: 50px !important;
-  }
-  div[data-testid="column"] {
-    padding: 2px !important;
-  }
-</style>
-""", unsafe_allow_html=True)
+def add_text(t, s):
+    return s + t
 
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# ✅ ใช้ text_input แบบผูก key เดียวตรงๆ
-st.text_input("พหุนาม", key="poly_input", label_visibility="collapsed")
+# แสดงช่อง input และรับค่าจากผู้ใช้
+input_str = st.text_input("พหุนาม", value=input_str, key="text_display")
 
-# ปุ่มต่าง ๆ
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
     ['4', '5', '6', 'คูณ', 'หาร'],
@@ -51,19 +41,25 @@ symbol_map = {
     'หาร': '/',
 }
 
+cols = None
 for row in button_rows:
     cols = st.columns(len(row))
     for i, btn in enumerate(row):
-        if cols[i].button(btn, key=f"{btn}_{i}"):
+        if cols[i].button(btn):
             if btn == '⌫':
-                backspace()
+                input_str = input_str[:-1]
             elif btn == 'ล้าง':
-                clear_input()
+                input_str = ""
             else:
                 actual = symbol_map.get(btn, btn)
-                add_text(actual)
+                input_str += actual
 
-# ปุ่มคำนวณ
+# อัปเดตค่า session_state จาก input_str หลังจากแก้ไขปุ่มแล้ว
+st.session_state.poly_input = input_str
+
+# แสดงข้อความ input อัปเดต
+st.code(st.session_state.poly_input, language="plaintext")
+
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
     try:
@@ -80,3 +76,4 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 st.code(str(result))
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
+
