@@ -1,20 +1,21 @@
 import streamlit as st
 import sympy as sp
 
-# ตั้งค่าหน้า
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
 
-# เก็บค่าการพิมพ์
 if "poly_input" not in st.session_state:
     st.session_state.poly_input = ""
 
 input_str = st.session_state.poly_input
 
 st.title("🧮 แยกตัวประกอบพหุนาม")
-st.markdown("ใส่พหุนาม เช่น `x^2+5*x+6`")
+st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# ปุ่มคีย์บอร์ด
+# แสดงค่าที่พิมพ์อยู่
+st.code(input_str, language="plaintext")
+
+# ปุ่มตัวเลขและสัญลักษณ์
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
     ['4', '5', '6', 'คูณ', 'หาร'],
@@ -38,11 +39,8 @@ for i, btn in enumerate(sum(button_rows, [])):
             input_str = ""
         else:
             input_str += symbol_map.get(btn, btn)
-
-st.session_state.poly_input = input_str
-
-# แสดง input
-st.code(input_str, language="plaintext")
+        st.session_state.poly_input = input_str
+        st.experimental_rerun()
 
 # ปุ่มคำนวณ
 if st.button("✅ คำนวณแยกตัวประกอบ"):
@@ -56,26 +54,8 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
             if degree is None or degree < 2 or degree > 10:
                 st.warning("⚠️ รองรับดีกรี 2 ถึง 10 เท่านั้น")
             else:
+                result = sp.factor(expr)
                 st.success("✅ ผลการแยกตัวประกอบ:")
-
-                # ✅ 1. แยกในจำนวนจริง (ไม่ต้องใส่ extension)
-                real_factor = sp.factor(expr)
-                st.markdown("**➤ แยกตัวประกอบในโดเมนจำนวนจริง (Real):**")
-                st.code(str(real_factor))
-
-                # ✅ 2. แยกในจำนวนเชิงซ้อน (Complex)
-                complex_factor = sp.factor(expr, extension=[sp.I])
-                st.markdown("**➤ แยกตัวประกอบในโดเมนจำนวนเชิงซ้อน (Complex):**")
-                st.code(str(complex_factor))
-
-                # ✅ 3. Quadratic form โดยใช้ราก
-                roots = sp.solve(expr, x)
-                if len(roots) > 0:
-                    quadratic_form = 1
-                    for r in roots:
-                        quadratic_form *= (x - r)
-                    st.markdown("**➤ แยกโดยใช้ราก (Quadratic/Complex Form):**")
-                    st.code(str(sp.simplify(quadratic_form)))
-
+                st.code(str(result))
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
