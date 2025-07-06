@@ -4,29 +4,39 @@ import sympy as sp
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
 
+# ใส่ CSS ปรับปุ่มให้ชิดติดกันบนมือถือ
+st.markdown("""
+<style>
+  div.stButton > button {
+    margin: 2px !important;
+    width: 50px !important;
+  }
+  div.stColumns > div {
+    padding: 0px !important;
+  }
+</style>
+""", unsafe_allow_html=True)
+
 if "poly_input" not in st.session_state:
     st.session_state.poly_input = ""
 
-# ฟังก์ชันเพิ่มข้อความ
 def add_text(text):
     st.session_state.poly_input += text
+    st.experimental_rerun()
 
-# ฟังก์ชันลบตัวอักษร
 def backspace():
     st.session_state.poly_input = st.session_state.poly_input[:-1]
+    st.experimental_rerun()
 
-# ฟังก์ชันล้างค่า
 def clear_input():
     st.session_state.poly_input = ""
+    st.experimental_rerun()
 
-# ส่วนหัว
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# แสดงสิ่งที่พิมพ์
 st.code(st.session_state.poly_input, language="plaintext")
 
-# ปุ่มแบบไม่ใช้สัญลักษณ์โดยตรง
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
     ['4', '5', '6', 'คูณ', 'หาร'],
@@ -34,7 +44,6 @@ button_rows = [
     ['0', '(', ')', '⌫', 'ล้าง']
 ]
 
-# แผนที่สำหรับแปลงปุ่มพิเศษเป็นเครื่องหมายจริง
 symbol_map = {
     'บวก': '+',
     'ลบ': '-',
@@ -42,7 +51,6 @@ symbol_map = {
     'หาร': '/',
 }
 
-# แสดงปุ่ม
 for row in button_rows:
     cols = st.columns(len(row))
     for i, btn in enumerate(row):
@@ -55,7 +63,6 @@ for row in button_rows:
                 actual = symbol_map.get(btn, btn)
                 add_text(actual)
 
-# ปุ่มคำนวณ
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
     try:
