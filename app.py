@@ -4,7 +4,20 @@ import sympy as sp
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
 
-# ใส่ CSS ให้ปุ่มอยู่ชิดกันในมือถือ
+if "poly_input" not in st.session_state:
+    st.session_state.poly_input = ""
+
+def backspace():
+    st.session_state.poly_input = st.session_state.poly_input[:-1]
+
+def clear_input():
+    st.session_state.poly_input = ""
+
+def add_text(t):
+    new_value = st.session_state.poly_input + t
+    st.session_state.poly_input = new_value  # แยกจาก text_input แล้ว
+
+# CSS ปรับปุ่มให้ชิดบนมือถือ
 st.markdown("""
 <style>
   div.stButton > button {
@@ -17,29 +30,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# เก็บ input ไว้ใน session_state
-if "poly_input" not in st.session_state:
-    st.session_state.poly_input = ""
-
-def update_input(new_text):
-    st.session_state.poly_input = new_text
-
-def add_text(t):
-    st.session_state.poly_input += t
-
-def backspace():
-    st.session_state.poly_input = st.session_state.poly_input[:-1]
-
-def clear_input():
-    st.session_state.poly_input = ""
-
 st.title("🧮 แยกตัวประกอบพหุนาม")
 st.markdown("ใส่พหุนาม (เช่น `x^2+5*x+6`)")
 
-# กล่อง input ผูกกับ session_state โดยตรง
-st.text_input("พหุนาม", key="poly_input", label_visibility="collapsed")
+# ดึงค่าจาก session_state มาแสดงแยก
+user_input = st.text_input("พหุนาม", value=st.session_state.poly_input, key="text_display")
 
-# ปุ่มกด
+# sync กลับเข้า session_state เมื่อเปลี่ยน
+if user_input != st.session_state.poly_input:
+    st.session_state.poly_input = user_input
+
 button_rows = [
     ['7', '8', '9', 'บวก', 'ลบ'],
     ['4', '5', '6', 'คูณ', 'หาร'],
@@ -66,7 +66,6 @@ for row in button_rows:
                 actual = symbol_map.get(btn, btn)
                 add_text(actual)
 
-# ปุ่มคำนวณ
 if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = st.session_state.poly_input.replace("^", "**").replace(" ", "")
     try:
