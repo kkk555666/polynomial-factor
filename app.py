@@ -52,7 +52,8 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
             if degree is None or degree < 2 or degree > 10:
                 st.warning("⚠️ รองรับดีกรี 2 ถึง 10 เท่านั้น")
             else:
-                result = sp.factor(expr)
+                # ✅ แยกแบบอนุญาตเชิงซ้อนด้วย
+                result = sp.factor(expr, extension=True)
                 st.success("✅ ผลการแยกตัวประกอบ:")
                 st.code(str(result))
     except Exception as e:
