@@ -92,4 +92,3 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
 
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
-
