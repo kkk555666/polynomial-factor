@@ -52,26 +52,40 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
             st.error("❌ ใช้ได้เฉพาะตัวแปร x เท่านั้น")
         else:
             degree = sp.degree(expr, x)
-            if degree is None or degree < 2 or degree > 10:
-                st.warning("⚠️ รองรับดีกรี 2 ถึง 10 เท่านั้น")
+            if degree is None or degree < 2 or degree > 4:
+                st.warning("⚠️ รองรับดีกรี 2 ถึง 4 เท่านั้น")
             else:
                 result = sp.factor(expr)
-                st.success("✅ ผลการแยกตัวประกอบ:")
-                st.code(str(result))
+                if result != expr:
+                    st.success("✅ ผลการแยกตัวประกอบ:")
+                    st.code(str(result))
+                else:
+                    st.error("❌ ไม่สามารถแยกตัวประกอบได้")
 
-                # ======= แสดงกราฟ =======
-                st.subheader("📈 กราฟของพหุนาม")
-                f_lambd = sp.lambdify(x, expr, 'numpy')
+                # ======= หาและแสดงรากของสมการ =======
+                roots = sp.solve(expr, x)
+                if roots:
+                    st.info(f"📌 รากของสมการ: {roots}")
+                else:
+                    st.warning("⚠ ไม่มีรากจริง (Real roots)")
+
+                # ======= แสดงกราฟคำตอบ =======
+                st.subheader("📈 กราฟคำตอบ")
                 X = np.linspace(-10, 10, 400)
+                f_lambd = sp.lambdify(x, expr, 'numpy')
                 Y = f_lambd(X)
 
                 fig, ax = plt.subplots()
                 ax.axhline(0, color='black', linewidth=1)
                 ax.axvline(0, color='black', linewidth=1)
                 ax.plot(X, Y, label=f"${sp.latex(expr)}$")
+                # จุดราก
+                real_roots = [sp.N(r) for r in roots if r.is_real]
+                ax.scatter(real_roots, [0]*len(real_roots), color='red', zorder=5, label="ราก")
                 ax.legend()
                 ax.grid(True)
                 st.pyplot(fig)
 
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
+}")
