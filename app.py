@@ -1,5 +1,8 @@
+
 import streamlit as st
 import sympy as sp
+import matplotlib.pyplot as plt
+import numpy as np
 
 st.set_page_config(page_title="แยกตัวประกอบพหุนาม", layout="centered")
 x = sp.symbols('x')
@@ -55,5 +58,20 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 result = sp.factor(expr)
                 st.success("✅ ผลการแยกตัวประกอบ:")
                 st.code(str(result))
+
+                # ======= แสดงกราฟ =======
+                st.subheader("📈 กราฟของพหุนาม")
+                f_lambd = sp.lambdify(x, expr, 'numpy')
+                X = np.linspace(-10, 10, 400)
+                Y = f_lambd(X)
+
+                fig, ax = plt.subplots()
+                ax.axhline(0, color='black', linewidth=1)
+                ax.axvline(0, color='black', linewidth=1)
+                ax.plot(X, Y, label=f"${sp.latex(expr)}$")
+                ax.legend()
+                ax.grid(True)
+                st.pyplot(fig)
+
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
