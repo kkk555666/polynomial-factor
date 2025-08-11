@@ -70,21 +70,22 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 else:
                     st.warning("⚠ ไม่มีรากจริง (Real roots)")
 
-                # แสดงกราฟคำตอบ
-                st.subheader("📈 กราฟคำตอบ")
+                # แสดงกราฟคำตอบเป็นเส้นตรงผ่าน f(0)
+                st.subheader("📈 กราฟคำตอบ (เส้นตรงผ่าน f(0))")
                 X = np.linspace(-10, 10, 400)
                 f_lambd = sp.lambdify(x, expr, 'numpy')
-                Y = f_lambd(X)
+                y0 = f_lambd(0)  # ค่า f(0)
+                Y = np.full_like(X, y0)  # สร้างเส้นตรง y = f(0)
 
                 fig, ax = plt.subplots()
                 ax.axhline(0, color='black', linewidth=1)
                 ax.axvline(0, color='black', linewidth=1)
-                ax.plot(X, Y, label=f"${sp.latex(expr)}$")
-                
+                ax.plot(X, Y, label=f"y = f(0) = {y0:.3f}", color='blue')
+
                 # จุดรากจริง (real roots)
                 real_roots = [float(r.evalf()) for r in roots if r.is_real]
                 ax.scatter(real_roots, [0]*len(real_roots), color='red', zorder=5, label="รากจริง")
-                
+
                 ax.legend()
                 ax.grid(True)
                 st.pyplot(fig)
