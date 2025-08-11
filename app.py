@@ -48,6 +48,7 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
     expr_str = input_str.replace("^", "**").replace(" ", "")
     try:
         expr = sp.sympify(expr_str, locals={'x': x})
+        # ตรวจสอบว่ามีตัวแปร x เท่านั้น
         if expr.free_symbols != {x} and expr.free_symbols != set():
             st.error("❌ ใช้ได้เฉพาะตัวแปร x เท่านั้น")
         else:
@@ -62,14 +63,14 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 else:
                     st.error("❌ ไม่สามารถแยกตัวประกอบได้")
 
-                # ======= หาและแสดงรากของสมการ =======
+                # หาและแสดงรากของสมการ
                 roots = sp.solve(expr, x)
                 if roots:
-                    st.info(f"📌 รากของสมการ: {roots}")
+                    st.info(f"📌 รากของสมการ: {', '.join([str(r) for r in roots])}")
                 else:
                     st.warning("⚠ ไม่มีรากจริง (Real roots)")
 
-                # ======= แสดงกราฟคำตอบ =======
+                # แสดงกราฟคำตอบ
                 st.subheader("📈 กราฟคำตอบ")
                 X = np.linspace(-10, 10, 400)
                 f_lambd = sp.lambdify(x, expr, 'numpy')
@@ -79,13 +80,15 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
                 ax.axhline(0, color='black', linewidth=1)
                 ax.axvline(0, color='black', linewidth=1)
                 ax.plot(X, Y, label=f"${sp.latex(expr)}$")
-                # จุดราก
-                real_roots = [sp.N(r) for r in roots if r.is_real]
-                ax.scatter(real_roots, [0]*len(real_roots), color='red', zorder=5, label="ราก")
+                
+                # จุดรากจริง (real roots)
+                real_roots = [float(r.evalf()) for r in roots if r.is_real]
+                ax.scatter(real_roots, [0]*len(real_roots), color='red', zorder=5, label="รากจริง")
+                
                 ax.legend()
                 ax.grid(True)
                 st.pyplot(fig)
 
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
-}")
+
