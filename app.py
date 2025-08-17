@@ -53,33 +53,27 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
             st.error("❌ ใช้ได้เฉพาะตัวแปร x เท่านั้น")
         else:
             degree = sp.degree(expr, x)
-            if degree is None or degree < 2 or degree > 4:
-                st.warning("⚠️ รองรับดีกรี 2 ถึง 4 เท่านั้น")
+            if degree is None or degree < 2 or degree > 10:
+                st.warning("⚠️ รองรับดีกรี 2 ถึง 10")
             else:
-                # แยกตัวประกอบ
-                result = sp.factor(expr)
-                if result != expr:
-                    st.success("✅ ผลการแยกตัวประกอบ:")
-                    st.code(str(result))
-                else:
-                    st.warning("⚠️ ไม่สามารถแยกตัวประกอบเชิงสัญลักษณ์ได้ (จะแสดงรากแทน)")
+                # แยกตัวประกอบเต็มด้วยรากเชิงตัวเลข
+                roots = sp.nroots(expr, n=15)  # เพิ่มความแม่นยำ
+                factors = []
+                for r in roots:
+                    factors.append(f"(x - ({r.evalf()}))")
+                factor_str = " * ".join(factors)
+                st.success("✅ ผลการแยกตัวประกอบ (รวมรากจริงและเชิงซ้อน):")
+                st.code(factor_str)
 
-                # หา root (real + complex)
-                roots = sp.nroots(expr)
-                if roots:
-                    roots_str = []
-                    for idx, r in enumerate(roots, start=1):
-                        if abs(r.as_real_imag()[1]) < 1e-8:  # ถ้าเป็น real
-                            val_str = f"{float(r):.6f}"
-                        else:
-                            val_str = str(r)
-                        roots_str.append(f"X{idx} = {val_str}")
-                    st.info("📌 รากของสมการ: " + "; ".join(roots_str))
-                else:
-                    st.warning("⚠ ไม่มีราก")
+                # แสดงรากแบบ X1, X2,...
+                roots_str = []
+                for idx, r in enumerate(roots, start=1):
+                    val_str = f"{r.evalf()}"
+                    roots_str.append(f"X{idx} = {val_str}")
+                st.info("📌 รากของสมการ: " + "; ".join(roots_str))
 
-                # === กราฟ f(x) ===
-                st.subheader("📈 กราฟจำนวนจริง")
+                # === กราฟจำนวนจริงของ f(x) ===
+                st.subheader("📈 กราฟจำนวนจริงของ f(x)")
                 X = np.linspace(-10, 10, 400)
                 f_lambd = sp.lambdify(x, expr, 'numpy')
                 Y = f_lambd(X)
@@ -99,3 +93,4 @@ if st.button("✅ คำนวณแยกตัวประกอบ"):
 
     except Exception as e:
         st.error(f"❌ เกิดข้อผิดพลาด: {e}")
+
